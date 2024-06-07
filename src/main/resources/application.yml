@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bayaraja-db
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 3000
+      maximum-pool-size: 5
+      minimum-idle: 3
+      idle-timeout: 600000
+      pool-name: BayarAja Application Pool
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    database: postgresql
+  servlet:
+    multipart:
+      max-file-size: 5MB
+  session:
+    timeout: 180m
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
+server:
+  servlet:
+    session:
+      timeout: 1m
+      tracking-modes: cookie
+      http-only: true
+      secure: false
+      name: JSESSIONID
+      domain: localhost
+      path: /
+      max-age: 600
+      same-site: strict
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
