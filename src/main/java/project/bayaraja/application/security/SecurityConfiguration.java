@@ -3,6 +3,7 @@ package project.bayaraja.application.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +21,7 @@ import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final UserAuthenticationProvider authenticationProvider;
+    private final AuthenticationProvider authenticationProvider;
     private final HandlerLogout handlerLogout;
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -43,7 +44,7 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(
                 (request) -> {
                     request.requestMatchers(SWAGGER_WHITELIST).permitAll();
-                    request.requestMatchers("/api/auth/login", "/api/auth/register").permitAll();
+                    request.requestMatchers("/api/auth/login", "/api/auth/register", "/api/user/index-user-by-phone").permitAll();
                     request.requestMatchers("/api/**").fullyAuthenticated();
                     request.requestMatchers("/api/public/**").permitAll();
                 }

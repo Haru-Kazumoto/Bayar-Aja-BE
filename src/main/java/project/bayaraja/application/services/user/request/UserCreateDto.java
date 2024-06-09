@@ -11,7 +11,7 @@ import project.bayaraja.application.enums.Roles;
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class UserCreateDto {
     @NotEmpty() @NotNull()
-    private String phone_number;
+    private String username;
 
     @NotEmpty() @NotNull()
     private String password;

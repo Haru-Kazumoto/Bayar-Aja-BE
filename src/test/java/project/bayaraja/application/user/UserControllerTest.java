@@ -53,13 +53,13 @@ public class UserControllerTest {
     void setUp() {
         user = UserEntity.builder()
                 .id(1)
-                .phone_number("0987")
+                .username("0987")
                 .password("123")
                 .role(Roles.USER)
                 .build();
 
         userDto = UserCreateDto.builder()
-                .phone_number("0987")
+                .username("0987")
                 .password("123")
                 .role(Roles.USER)
                 .build();
@@ -82,7 +82,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.messages").isArray())
                 .andExpect(jsonPath("$.payload").exists())
                 .andExpect(jsonPath("$.messages", CoreMatchers.is(List.of("OK"))))
-                .andExpect(jsonPath("$.payload.phone_number", CoreMatchers.is(user.getPhone_number())))
+                .andExpect(jsonPath("$.payload.phone_number", CoreMatchers.is(user.getUsername())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -101,7 +101,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.payload.id").exists())
                 .andExpect(jsonPath("$.payload.phone_number").exists())
                 .andExpect(jsonPath("$.payload.id", CoreMatchers.is(user.getId())))
-                .andExpect(jsonPath("$.payload.phone_number", CoreMatchers.is(user.getPhone_number())))
+                .andExpect(jsonPath("$.payload.phone_number", CoreMatchers.is(user.getUsername())))
                 .andDo(MockMvcResultHandlers.print());
     }
 }

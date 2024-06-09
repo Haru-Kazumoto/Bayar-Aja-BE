@@ -23,8 +23,8 @@ public class UserServiceImpl implements UserService {
 
     @Override @Transactional
     public UserEntity createUser(UserCreateDto bodyDto) {
-        Optional<UserEntity> userPhoneNumber = this.userRepository.findByPhoneNumber(
-                bodyDto.getPhone_number()
+        Optional<UserEntity> userPhoneNumber = this.userRepository.findByUsername(
+                bodyDto.getUsername()
         );
 
         if(userPhoneNumber.isPresent()) throw new IllegalArgumentException("Phone number already in used");

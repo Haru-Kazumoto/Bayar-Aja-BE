@@ -45,19 +45,19 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         userCreateDto = new UserCreateDto();
-        userCreateDto.setPhone_number("0987");
+        userCreateDto.setUsername("0987");
         userCreateDto.setPassword("password");
 
         userEntity = new UserEntity();
         userEntity.setId(1);
-        userEntity.setPhone_number("0987");
+        userEntity.setUsername("0987");
         userEntity.setPassword("encodedPassword");
         userEntity.setRole(Roles.USER);
 
         users = List.of(
-                UserEntity.builder().phone_number("0987").password("encode").role(Roles.USER).build(),
-                UserEntity.builder().phone_number("0986").password("encode").role(Roles.USER).build(),
-                UserEntity.builder().phone_number("0985").password("encode").role(Roles.USER).build()
+                UserEntity.builder().username("0987").password("encode").role(Roles.USER).build(),
+                UserEntity.builder().username("0986").password("encode").role(Roles.USER).build(),
+                UserEntity.builder().username("0985").password("encode").role(Roles.USER).build()
         );
     }
 
@@ -69,31 +69,31 @@ public class UserServiceTest {
 
     @Test
     void shouldCreateUserSuccessfullyWhenDataIsValid() {
-        when(userRepository.findByPhoneNumber(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(modelMapper.map(any(UserCreateDto.class), eq(UserEntity.class))).thenReturn(userEntity);
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 
         UserEntity createdUser = userService.createUser(userCreateDto);
 
-        verify(userRepository).findByPhoneNumber("0987");
+        verify(userRepository).findByUsername("0987");
         verify(passwordEncoder).encode("password");
         verify(modelMapper).map(userCreateDto, UserEntity.class);
         verify(userRepository).save(userEntity);
 
         assertNotNull(createdUser);
-        assertEquals("0987",createdUser.getPhone_number());
+        assertEquals("0987",createdUser.getUsername());
     }
 
     @Test
     void shouldErrorWhenPhoneNumberIsDuplicate() {
-        when(userRepository.findByPhoneNumber(anyString())).thenReturn(Optional.of(userEntity));
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
 
         assertThrows(IllegalArgumentException.class, () -> {
             userService.createUser(userCreateDto);
         });
 
-        verify(userRepository).findByPhoneNumber("0987");
+        verify(userRepository).findByUsername("0987");
         verify(passwordEncoder, never()).encode(anyString());
         verify(modelMapper, never()).map(any(UserCreateDto.class), eq(UserEntity.class));
         verify(userRepository, never()).save(any(UserEntity.class));
@@ -129,7 +129,7 @@ public class UserServiceTest {
         verify(userRepository).findById(1);
 
         assertNotNull(result);
-        assertEquals("0987", result.getPhone_number());
+        assertEquals("0987", result.getUsername());
     }
 
     @Test

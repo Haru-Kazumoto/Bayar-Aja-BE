@@ -93,12 +93,12 @@ public class AuthControllerTest {
     @BeforeEach
     void setUp() {
         loginRequest = LoginRequest.builder()
-                .phone_number("123")
+                .username("123")
                 .password("321")
                 .build();
 
         registerRequest = RegisterRequest.builder()
-                .phone_number("0987")
+                .username("0987")
                 .password("123")
                 .role(Roles.USER)
                 .student(studentCreateDto)
@@ -111,7 +111,7 @@ public class AuthControllerTest {
 
         user = UserEntity.builder()
                 .id(1)
-                .phone_number("123")
+                .username("123")
                 .password("321")
                 .role(Roles.ADMIN)
                 .build();
@@ -134,7 +134,7 @@ public class AuthControllerTest {
     @Test
     void shouldSuccessLoginWhenDataIsValid() throws Exception {
         UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(
-                loginRequest.getPhone_number(),
+                loginRequest.getUsername(),
                 loginRequest.getPassword()
         );
 //
@@ -160,11 +160,11 @@ public class AuthControllerTest {
     @Test
     void shouldSuccessRegistrationWhenDataIsValid() throws Exception {
         // Arrange
-        given(userRepository.findByPhoneNumber(any(String.class))).willReturn(Optional.empty());
+        given(userRepository.findByUsername(any(String.class))).willReturn(Optional.empty());
         given(authService.registerUser(any(RegisterRequest.class))).willAnswer(invocation -> {
             RegisterRequest request = invocation.getArgument(0);
             UserEntity userEntity = new UserEntity();
-            userEntity.setPhone_number(request.getPhone_number());
+            userEntity.setUsername(request.getUsername());
             userEntity.setPassword(request.getPassword());
             if (request.getStudent() != null) {
                 StudentEntity studentEntity = new StudentEntity();
@@ -186,7 +186,7 @@ public class AuthControllerTest {
         String phoneNumber = "1234567890";
         String password = "password";
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setPhone_number(phoneNumber);
+        registerRequest.setUsername(phoneNumber);
         registerRequest.setPassword(password);
         registerRequest.setStudent(new StudentCreateDto());
 

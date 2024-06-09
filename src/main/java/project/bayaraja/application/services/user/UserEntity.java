@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-@Getter @Setter @Builder
+@EqualsAndHashCode(callSuper = true)
+@Data @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity @Table(name = "users")
@@ -36,11 +37,11 @@ public class UserEntity extends Timestamps implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
-    private String phone_number;
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
     @Column(name = "password", nullable = false)
-//    @JsonIgnore
+    @JsonIgnore
     private String password;
 
     @Column(name = "profile_picture", nullable = true)
@@ -87,7 +88,7 @@ public class UserEntity extends Timestamps implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isAccountNonLocked() {
-        return this.is_verified;
+        return is_verified;
     }
 
     @Override
@@ -105,11 +106,16 @@ public class UserEntity extends Timestamps implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(() -> this.role.name());
+        return Collections.singletonList(() -> role.name());
     }
 
     @Override
     public String getUsername() {
-        return this.phone_number;
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 }

@@ -22,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,7 @@ import project.bayaraja.application.services.auth.interfaces.AuthService;
 import project.bayaraja.application.services.auth.request.LoginRequest;
 import project.bayaraja.application.services.auth.request.RegisterRequest;
 import project.bayaraja.application.services.user.UserEntity;
+import project.bayaraja.application.services.user.UserRepository;
 import project.bayaraja.application.utils.BaseResponse;
 
 import java.util.Collections;
@@ -40,7 +43,6 @@ import java.util.Collections;
 public class AuthController {
 
     private final AuthService authService;
-    private final ModelMapper modelMapper;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
     private final AuthenticationManager authenticationManager;
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
@@ -90,8 +92,9 @@ public class AuthController {
         //get user credential for wrapped to token
         UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken
                 .unauthenticated(
-                        loginRequest.getPhone_number(), loginRequest.getPassword()
+                        loginRequest.getUsername(), loginRequest.getPassword()
                 );
+
         Authentication authentication = authenticationManager.authenticate(token);
         SecurityContext context = securityContextHolderStrategy.createEmptyContext();
 

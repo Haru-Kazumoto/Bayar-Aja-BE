@@ -65,7 +65,7 @@ public class AuthServiceTest {
 
         user = UserEntity.builder()
                 .id(1)
-                .phone_number("0987")
+                .username("0987")
                 .password("123")
                 .role(Roles.USER)
                 .is_verified(false)
@@ -79,7 +79,7 @@ public class AuthServiceTest {
                 .build();
 
         registerRequest = RegisterRequest.builder()
-                .phone_number("0987")
+                .username("0987")
                 .password("123")
                 .role(Roles.USER)
                 .student(studentCreateDto)
@@ -116,14 +116,14 @@ public class AuthServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userRepository.findByPhoneNumber("0987")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername("0987")).thenReturn(Optional.of(user));
 
         UserEntity result = authService.decodeSession();
 
-        verify(userRepository).findByPhoneNumber("0987");
+        verify(userRepository).findByUsername("0987");
 
         assertNotNull(result);
-        assertEquals("0987", result.getPhone_number());
+        assertEquals("0987", result.getUsername());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class AuthServiceTest {
 
     @Test
     void shouldErrorWhenPhoneNumberIsExist() {
-        when(userRepository.findByPhoneNumber(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
         assertThrows(IllegalArgumentException.class, () -> {
             authService.registerUser(registerRequest);

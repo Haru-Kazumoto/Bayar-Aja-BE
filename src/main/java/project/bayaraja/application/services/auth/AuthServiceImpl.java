@@ -13,12 +13,8 @@ import project.bayaraja.application.exceptions.BadRequestException;
 import project.bayaraja.application.exceptions.DataNotFoundException;
 import project.bayaraja.application.services.auth.interfaces.AuthService;
 import project.bayaraja.application.services.auth.request.RegisterRequest;
-import project.bayaraja.application.services.students.StudentEntity;
-import project.bayaraja.application.services.students.StudentRepository;
 import project.bayaraja.application.services.user.UserEntity;
 import project.bayaraja.application.services.user.UserRepository;
-import project.bayaraja.application.services.user.interfaces.UserService;
-import project.bayaraja.application.services.user.request.UserCreateDto;
 
 import java.util.Date;
 import java.util.Optional;
@@ -34,11 +30,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UserEntity registerUser(RegisterRequest bodyDto) {
-        Optional<UserEntity> userPhoneNumber = this.userRepository.findByPhoneNumber(
-                bodyDto.getPhone_number()
+        Optional<UserEntity> userPhoneNumber = this.userRepository.findByUsername(
+                bodyDto.getUsername()
         );
 
-        this.checkPhoneNumber(userPhoneNumber);
+        this.checkUsername(userPhoneNumber);
 
         bodyDto.setPassword(this.passwordEncoder.encode(bodyDto.getPassword()));
 
@@ -60,11 +56,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserEntity decodeSession() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        var userData = (User)authentication.getPrincipal();
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getPrincipal().toString();
 
-        return userRepository.findByPhoneNumber(userData.getUsername()).orElseThrow(
+        return userRepository.findByUsername(username).orElseThrow(
                 () -> new BadCredentialsException("Username is not found.")
         );
     }
@@ -77,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         dataUser.setVerified_at(new Date());
     }
 
-    private void checkPhoneNumber(Optional<UserEntity> dataUser){
+    private void checkUsername(Optional<UserEntity> dataUser){
         if(dataUser.isPresent()) throw new IllegalArgumentException("Phone number already in used");
     }
 }

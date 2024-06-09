@@ -20,10 +20,15 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import project.bayaraja.application.exceptions.BadRequestException;
+import project.bayaraja.application.exceptions.DataNotFoundException;
+import project.bayaraja.application.exceptions.DuplicateDataException;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -31,46 +36,54 @@ import static org.springframework.http.HttpStatus.*;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ExceptionHandling extends ResponseEntityExceptionHandler {
 
-    private record ExceptionDetails(String message, HttpStatus httpStatus, Date timestamp) { }
+    private record ExceptionDetails(List<String> message, HttpStatus httpStatus) { }
 
     @ExceptionHandler(value = {RuntimeException.class, UnsupportedOperationException.class, IllegalStateException.class})
-    public ResponseEntity<?> runTimeException(Exception ex) {
+    public ResponseEntity<?> internalServerError(Exception ex) {
         var exceptionDetails = new ExceptionDetails(
-                ex.getMessage(),
-                INTERNAL_SERVER_ERROR,
-                new Date()
+                Collections.singletonList(ex.getMessage()),
+                INTERNAL_SERVER_ERROR
         );
         return new ResponseEntity<>(exceptionDetails, INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(value = {BadCredentialsException.class})
-    public ResponseEntity<?> badcredentialException(Exception ex) {
+    @ExceptionHandler(value = {BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<?> unauthorized(Exception ex) {
         var exceptionDetails = new ExceptionDetails(
-                ex.getMessage(),
-                UNAUTHORIZED,
-                new Date()
+                List.of(ex.getMessage()),
+                UNAUTHORIZED
         );
         return new ResponseEntity<>(exceptionDetails, UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = {AuthenticationException.class})
-    public ResponseEntity<?> authenticationException(Exception e) {
+    @ExceptionHandler(value = {
+            DataNotFoundException.class,
+            BadRequestException.class,
+            MethodValidationException.class
+    })
+    public ResponseEntity<?> badRequest(Exception ex){
         var exceptionDetails = new ExceptionDetails(
-                e.getMessage(),
-                UNAUTHORIZED,
-                new Date()
+                List.of(ex.getMessage()),
+                BAD_REQUEST
         );
-        return new ResponseEntity<>(exceptionDetails, UNAUTHORIZED);
+        return new ResponseEntity<>(exceptionDetails, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {DuplicateDataException.class})
+    public ResponseEntity<?> conflict(Exception ex){
+        var exceptionDetails = new ExceptionDetails(
+                List.of(ex.getMessage()),
+                CONFLICT
+        );
+        return new ResponseEntity<>(exceptionDetails, CONFLICT);
     }
 
     @ExceptionHandler(value = {AccessDeniedException.class})
-    public ResponseEntity<?> accessDenied(Exception e) {
+    public ResponseEntity<?> forbiddenResource(Exception ex) {
         var exceptionDetails = new ExceptionDetails(
-                e.getMessage(),
-                FORBIDDEN,
-                new Date()
+                List.of(ex.getMessage()),
+                FORBIDDEN
         );
         return new ResponseEntity<>(exceptionDetails, FORBIDDEN);
     }
-
 }

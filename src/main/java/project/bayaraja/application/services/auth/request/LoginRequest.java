@@ -9,7 +9,7 @@ import lombok.*;
 public class LoginRequest {
     @NotNull()
     @NotEmpty()
-    private String phone_number;
+    private String username;
 
     @NotNull()
     @NotEmpty()

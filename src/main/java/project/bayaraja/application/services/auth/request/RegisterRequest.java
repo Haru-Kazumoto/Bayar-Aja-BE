@@ -13,7 +13,7 @@ public class RegisterRequest {
 
     @NotEmpty()
     @NotNull()
-    private String phone_number;
+    private String username;
 
     @NotEmpty()
     @NotNull()
