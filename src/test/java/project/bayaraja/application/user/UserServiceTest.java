@@ -5,15 +5,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 import project.bayaraja.application.enums.Roles;
+import project.bayaraja.application.exceptions.DataNotFoundException;
 import project.bayaraja.application.services.user.UserEntity;
-import project.bayaraja.application.services.user.UserRepository;
+import project.bayaraja.application.services.user.interfaces.UserRepository;
 import project.bayaraja.application.services.user.UserServiceImpl;
 import project.bayaraja.application.services.user.request.UserCreateDto;
+import project.bayaraja.application.services.user.request.UserUpdateDto;
 
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,8 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
         userCreateDto = new UserCreateDto();
         userCreateDto.setUsername("0987");
         userCreateDto.setPassword("password");
@@ -68,35 +74,46 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldCreateUserSuccessfullyWhenDataIsValid() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(modelMapper.map(any(UserCreateDto.class), eq(UserEntity.class))).thenReturn(userEntity);
-        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
+    void shouldErrorUpdateUserWhenDataIsNotFound() {
+        lenient().when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        UserEntity createdUser = userService.createUser(userCreateDto);
-
-        verify(userRepository).findByUsername("0987");
-        verify(passwordEncoder).encode("password");
-        verify(modelMapper).map(userCreateDto, UserEntity.class);
-        verify(userRepository).save(userEntity);
-
-        assertNotNull(createdUser);
-        assertEquals("0987",createdUser.getUsername());
+        assertThrows(DataNotFoundException.class, () -> {
+            userService.updateUser(1, new UserUpdateDto());
+        });
     }
 
     @Test
-    void shouldErrorWhenPhoneNumberIsDuplicate() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userEntity));
+    void shouldSuccessUpdateWhenUserDataIsValid() {
+        UserEntity existingUser = new UserEntity();
+        existingUser.setId(1);
+        existingUser.setUsername("oldUsername");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(userCreateDto);
-        });
+        UserUpdateDto updateDto = new UserUpdateDto();
+        updateDto.setUsername("newUsername");
+        updateDto.setPassword("newPassword");
+        updateDto.setProfile_picture(mock(MultipartFile.class));
+        when(updateDto.getProfile_picture().getOriginalFilename()).thenReturn("newProfilePic.jpg");
 
-        verify(userRepository).findByUsername("0987");
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(modelMapper, never()).map(any(UserCreateDto.class), eq(UserEntity.class));
-        verify(userRepository, never()).save(any(UserEntity.class));
+        UserEntity mappedUser = new UserEntity();
+        mappedUser.setUsername("oldUsername");
+
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(modelMapper.map(existingUser, UserEntity.class)).thenReturn(mappedUser);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(UserEntity.class))).thenReturn(mappedUser);
+
+        UserEntity updatedUser = userService.updateUser(1, updateDto);
+
+        assertEquals("newUsername", updatedUser.getUsername());
+        assertEquals("encodedPassword", updatedUser.getPassword());
+        assertEquals("newProfilePic.jpg", updatedUser.getProfile_picture());
+
+        verify(userRepository, times(1)).findById(1);
+        verify(userRepository, times(1)).findByUsername("newUsername");
+        verify(modelMapper, times(1)).map(existingUser, UserEntity.class);
+        verify(passwordEncoder, times(1)).encode("newPassword");
+        verify(userRepository, times(1)).save(mappedUser);
     }
 
     @Test

@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.logout.HeaderWriterLogout
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
+import project.bayaraja.application.enums.Roles;
 
 @Configuration
 @EnableWebSecurity
@@ -44,7 +45,11 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(
                 (request) -> {
                     request.requestMatchers(SWAGGER_WHITELIST).permitAll();
-                    request.requestMatchers("/api/auth/login", "/api/auth/register", "/api/user/index-user-by-phone").permitAll();
+                    request.requestMatchers("/api/auth/login", "/api/auth/register").permitAll();
+
+//                    request.requestMatchers("/api/user/**").hasAnyRole(Roles.USER.name(), Roles.ADMIN.name());
+//                    request.requestMatchers("/api/admin/**").hasRole(Roles.ADMIN.name());
+
                     request.requestMatchers("/api/**").fullyAuthenticated();
                     request.requestMatchers("/api/public/**").permitAll();
                 }

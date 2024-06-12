@@ -1,7 +1,5 @@
 package project.bayaraja.application.services.auth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,26 +10,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 import project.bayaraja.application.services.auth.interfaces.AuthService;
 import project.bayaraja.application.services.auth.request.LoginRequest;
 import project.bayaraja.application.services.auth.request.RegisterRequest;
 import project.bayaraja.application.services.user.UserEntity;
-import project.bayaraja.application.services.user.UserRepository;
 import project.bayaraja.application.utils.BaseResponse;
 
 import java.util.Collections;
@@ -43,9 +29,7 @@ import java.util.Collections;
 public class AuthController {
 
     private final AuthService authService;
-    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
-    private final AuthenticationManager authenticationManager;
-    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+
 
     @PostMapping(path = "/register")
     @ApiResponses({
@@ -84,26 +68,37 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public void login(
-            @RequestBody LoginRequest loginRequest,
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws JsonProcessingException {
-        //get user credential for wrapped to token
-        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken
-                .unauthenticated(
-                        loginRequest.getUsername(), loginRequest.getPassword()
-                );
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = BaseResponse.class)
+                            )
+                    },
+                    description = "ACCEPTED RESPONSE"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = RegisterRequest.class)
+                            )
+                    },
+                    description = "BAD REQUEST RESPONSE"
+            )
+    })
+    @Operation(summary = "Login user", description = "User verified credential")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+        this.authService.login(loginRequest, request, response);
+    }
 
-        Authentication authentication = authenticationManager.authenticate(token);
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-
-        context.setAuthentication(authentication); //set context application from authentication
-        securityContextHolderStrategy.setContext(context);
-
-        System.out.println(securityContextHolderStrategy.getContext());
-
-        securityContextRepository.saveContext(context, request, response); //save the auth context
+    @PostMapping("/logout")
+    public ResponseEntity<HttpStatus> logout(){
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @GetMapping("/decode-session")

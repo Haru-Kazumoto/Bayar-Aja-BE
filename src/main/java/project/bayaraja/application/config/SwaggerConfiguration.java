@@ -1,4 +1,4 @@
-package project.bayaraja.application.security;
+package project.bayaraja.application.config;
 
 import io.swagger.v3.oas.annotations.tags.Tags;
 import io.swagger.v3.oas.models.Components;
@@ -52,6 +52,8 @@ public class SwaggerConfiguration {
         tags.add(3, new Tag().name("Invoices").description("Invoices Management"));
         tags.add(4, new Tag().name("SPP").description("SPP Management"));
         tags.add(5, new Tag().name("Auth").description("Authentication Management"));
+        tags.add(6, new Tag().name("ClassInfo").description("Class Info Management"));
+        tags.add(7, new Tag().name("ClassStudent").description("Class Student Management"));
 
         return tags;
     }

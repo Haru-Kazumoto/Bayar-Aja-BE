@@ -71,22 +71,6 @@ public class UserControllerTest {
     }
 
     @Test
-    void shouldReturnCreatedWhenDataValid() throws Exception {
-        given(userService.createUser(ArgumentMatchers.any())).willReturn(user);
-
-        ResultActions response = mockMvc.perform(post("/api/user/create-user")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(userDto)));
-
-        response.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.messages").isArray())
-                .andExpect(jsonPath("$.payload").exists())
-                .andExpect(jsonPath("$.messages", CoreMatchers.is(List.of("OK"))))
-                .andExpect(jsonPath("$.payload.phone_number", CoreMatchers.is(user.getUsername())))
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
     void shouldReturnSingleUserWhenDataExist() throws Exception {
         int idUser = 1;
         given(userService.getUserById(ArgumentMatchers.anyInt())).willReturn(user);

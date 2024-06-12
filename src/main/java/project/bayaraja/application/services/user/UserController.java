@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import project.bayaraja.application.services.auth.interfaces.AuthService;
+import project.bayaraja.application.services.auth.request.RegisterRequest;
 import project.bayaraja.application.services.user.interfaces.UserService;
 import project.bayaraja.application.services.user.request.UserCreateDto;
 import project.bayaraja.application.utils.BaseResponse;
@@ -24,11 +26,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     @PostMapping(path = "/create-user")
-    public ResponseEntity<BaseResponse<UserEntity>> createUser(@RequestBody @Valid UserCreateDto dto) {
-        UserEntity savedUser = this.userService.createUser(dto);
+    public ResponseEntity<BaseResponse<UserEntity>> createUser(@RequestBody @Valid RegisterRequest dto) {
+        UserEntity savedUser = this.authService.registerUser(dto);
 
         BaseResponse<UserEntity> response = new BaseResponse<>(
                 Collections.singletonList("OK"),
@@ -38,7 +40,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/index-users")
+    @GetMapping("/index-user-paged")
     public ResponseEntity<BaseResponse<Page<UserEntity>>> getUserWithPaged(@ParameterObject Pageable pageable){
         Page<UserEntity> indexPagedUser = this.userService.getAllUser(pageable);
 
@@ -50,10 +52,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/index-user")
+    @GetMapping("/index-user-by-id")
     public ResponseEntity<BaseResponse<UserEntity>> getUserById(
-            @Parameter(name = "userId", example = "1", required = true)
-            @RequestParam("userId")
+            @Parameter(name = "user-id", example = "1", required = true)
+            @RequestParam("user-id")
             Integer userId
     ){
         UserEntity userGet = this.userService.getUserById(userId);

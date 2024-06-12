@@ -7,14 +7,20 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Date;
 
 @MappedSuperclass
 @Data
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction(value = "deleted_at=CURRENT_TIMESTAMP")
+@FilterDef(name = "deletedFilter", parameters = @ParamDef(
+        name = "deleted_at",
+        type = Date.class
+))
+@Filter(name = "deletedFilter", condition = "deleted_at = :isDeleted")
 public class Timestamps {
 
     @JsonSerialize(using = DateSerializer.class)

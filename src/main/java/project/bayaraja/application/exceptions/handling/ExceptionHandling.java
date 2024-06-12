@@ -44,7 +44,7 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
                 Collections.singletonList(ex.getMessage()),
                 INTERNAL_SERVER_ERROR
         );
-        return new ResponseEntity<>(exceptionDetails, INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
     }
 
     @ExceptionHandler(value = {BadCredentialsException.class, AuthenticationException.class})
@@ -53,20 +53,19 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
                 List.of(ex.getMessage()),
                 UNAUTHORIZED
         );
-        return new ResponseEntity<>(exceptionDetails, UNAUTHORIZED);
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
     }
 
     @ExceptionHandler(value = {
             DataNotFoundException.class,
             BadRequestException.class,
-            MethodValidationException.class
     })
     public ResponseEntity<?> badRequest(Exception ex){
         var exceptionDetails = new ExceptionDetails(
                 List.of(ex.getMessage()),
                 BAD_REQUEST
         );
-        return new ResponseEntity<>(exceptionDetails, BAD_REQUEST);
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
     }
 
     @ExceptionHandler(value = {DuplicateDataException.class})
@@ -75,7 +74,7 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
                 List.of(ex.getMessage()),
                 CONFLICT
         );
-        return new ResponseEntity<>(exceptionDetails, CONFLICT);
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
     }
 
     @ExceptionHandler(value = {AccessDeniedException.class})
@@ -84,6 +83,16 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler {
                 List.of(ex.getMessage()),
                 FORBIDDEN
         );
-        return new ResponseEntity<>(exceptionDetails, FORBIDDEN);
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodValidationException(MethodValidationException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        var exceptionDetails = new ExceptionDetails(
+                List.of(ex.getMessage()),
+                BAD_REQUEST
+        );
+
+        return new ResponseEntity<>(exceptionDetails, exceptionDetails.httpStatus);
     }
 }

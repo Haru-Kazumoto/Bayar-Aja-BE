@@ -1,6 +1,8 @@
 package project.bayaraja.application.services.user;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -25,13 +27,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity @Table(name = "users")
-@SQLDelete(sql = "UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@SQLRestriction(value = "deleted_at=CURRENT_TIMESTAMP")
-@FilterDef(name = "deletedUserFilter", parameters = @ParamDef(
-        name = "deleted_at",
-        type = Date.class
-))
-@Filter(name = "deletedUserFilter", condition = "deleted_at = :isDeleted")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class UserEntity extends Timestamps implements UserDetails {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -106,7 +105,7 @@ public class UserEntity extends Timestamps implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(() -> role.name());
+        return Collections.singletonList(() -> this.role.name());
     }
 
     @Override

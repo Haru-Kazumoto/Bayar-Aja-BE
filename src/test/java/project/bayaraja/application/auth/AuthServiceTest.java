@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
@@ -17,10 +18,9 @@ import project.bayaraja.application.enums.Roles;
 import project.bayaraja.application.services.auth.AuthServiceImpl;
 import project.bayaraja.application.services.auth.request.RegisterRequest;
 import project.bayaraja.application.services.students.StudentEntity;
-import project.bayaraja.application.services.students.StudentRepository;
 import project.bayaraja.application.services.students.request.StudentCreateDto;
 import project.bayaraja.application.services.user.UserEntity;
-import project.bayaraja.application.services.user.UserRepository;
+import project.bayaraja.application.services.user.interfaces.UserRepository;
 
 import java.util.Date;
 import java.util.Optional;
@@ -52,6 +52,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
 
         student = StudentEntity.builder()
             .id(1)
